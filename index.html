@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>The Velvet Bean Café | Artisanal Roastery & Sanctuary</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            bg: '#FDFBF7',         /* Warm Cream Canvas */
+                            card: '#FFFFFF',       /* Crisp Pure White */
+                            accent: '#F5F2EB',     /* Soft Taupe Neutral */
+                            border: '#E2DDD5',     /* Architectural Border */
+                            charcoal: '#1A1A18',   /* Editorial Deep Charcoal */
+                            muted: '#66635B',      /* Muted Secondary Text */
+                            terracotta: '#C86D51', /* Warm Terracotta Highlight */
+                            gold: '#D4AF37',       /* Metallic Gold Trim */
+                            porcelain: '#FAF8F5'   /* Creamy White Porcelain */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', '-apple-system', 'sans-serif'],
+                        heading: ['Space Grotesk', 'Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js for 3D White Porcelain & Metallic Gold Coffee Cup -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #FDFBF7; }
+        ::-webkit-scrollbar-thumb { background: #C86D51; }
+
+        body {
+            background-color: #FDFBF7;
+            color: #1A1A18;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .sharp-card {
+            border: 1px solid #E2DDD5;
+            border-radius: 2px;
+            background-color: #FFFFFF;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sharp-card:hover {
+            border-color: #1A1A18;
+        }
+
+        .page-view {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .page-view.hidden-page {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .page-view.active-page {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Fixed Background 3D Canvas Container */
+        #bgCanvasContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.85;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-pastel-bg text-pastel-charcoal min-h-screen flex flex-col justify-between antialiased selection:bg-pastel-terracotta selection:text-white">
+
+    <!-- FIXED 3D THREE.JS CANVAS BACKDROP LAYER -->
+    <div id="bgCanvasContainer">
+        <canvas id="cupCanvas" class="w-full h-full block"></canvas>
+    </div>
+
+    <!-- MAIN INTERFACE CONTENT LAYER -->
+    <div class="content-layer flex-grow flex flex-col justify-between">
+        
+        <!-- STICKY NAVIGATION BAR -->
+        <header class="sticky top-0 z-50 bg-pastel-bg/90 backdrop-blur-md border-b border-pastel-border">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    
+                    <!-- BRAND LOGO -->
+                    <a href="#home" onclick="navigateTo('home'); return false;" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 border-2 border-pastel-charcoal bg-pastel-card flex items-center justify-center font-heading font-bold text-sm text-pastel-charcoal group-hover:bg-pastel-charcoal group-hover:text-white transition-colors">
+                            VB
+                        </div>
+                        <div>
+                            <span class="font-heading text-lg font-bold tracking-tight text-pastel-charcoal uppercase block leading-none">
+                                The Velvet Bean
+                            </span>
+                            <span class="text-[9px] tracking-[0.2em] uppercase text-pastel-terracotta font-bold block mt-1">Artisanal Café & Roastery</span>
+                        </div>
+                    </a>
+
+                    <!-- Desktop Navigation Links (5 SPA Routes) -->
+                    <nav class="hidden md:flex items-center space-x-1">
+                        <button onclick="navigateTo('home')" id="nav-home" class="nav-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-pastel-charcoal bg-pastel-accent border border-pastel-border rounded-xs">
+                            Home
+                        </button>
+                        <button onclick="navigateTo('menu')" id="nav-menu" class="nav-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-pastel-muted hover:text-pastel-charcoal transition-colors">
+                            Menu
+                        </button>
+                        <button onclick="navigateTo('hours')" id="nav-hours" class="nav-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-pastel-muted hover:text-pastel-charcoal transition-colors">
+                            Hours
+                        </button>
+                        <button onclick="navigateTo('location')" id="nav-location" class="nav-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-pastel-muted hover:text-pastel-charcoal transition-colors">
+                            Location
+                        </button>
+                        <button onclick="navigateTo('contact')" id="nav-contact" class="nav-btn px-4 py-2 text-xs font-bold uppercase tracking-widest text-pastel-muted hover:text-pastel-charcoal transition-colors">
+                            Contact
+                        </button>
+                    </nav>
+
+                    <div class="hidden sm:flex items-center gap-3">
+                        <button onclick="navigateTo('menu')" class="px-5 py-2.5 bg-pastel-terracotta hover:bg-pastel-charcoal text-white text-xs font-bold uppercase tracking-widest transition-colors shadow-xs">
+                            View Menu
+                        </button>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="md:hidden p-2 text-pastel-charcoal focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Drawer -->
+            <div id="mobile-menu" class="hidden md:hidden bg-pastel-card border-b border-pastel-border px-4 pt-2 pb-6 space-y-1">
+                <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-pastel-charcoal hover:bg-pastel-accent">Home</button>
+                <button onclick="navigateTo('menu'); toggleMobileMenu();" class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-pastel-charcoal hover:bg-pastel-accent">Menu</button>
+                <button onclick="navigateTo('hours'); toggleMobileMenu();" class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-pastel-charcoal hover:bg-pastel-accent">Hours</button>
+                <button onclick="navigateTo('location'); toggleMobileMenu();" class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-pastel-charcoal hover:bg-pastel-accent">Location</button>
+                <button onclick="navigateTo('contact'); toggleMobileMenu();" class="w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest text-pastel-charcoal hover:bg-pastel-accent">Contact</button>
+            </div>
+        </header>
+
+        <!-- ROUTER MAIN VIEWPORT -->
+        <main class="flex-grow">
+
+            <!-- ================= ROUTE 1: HOME ================= -->
+            <div id="page-home" class="page-view active-page">
+                
+                <!-- Hero Section -->
+                <section class="min-h-[80vh] flex items-center py-12 px-4 sm:px-6 lg:px-8 border-b border-pastel-border bg-pastel-bg/80 backdrop-blur-xs">
+                    <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-12 gap-12 items-center">
+                        
+                        <!-- Left Hero Content -->
+                        <div class="lg:col-span-7 space-y-6">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-pastel-accent text-pastel-charcoal text-[11px] font-bold uppercase tracking-widest border border-pastel-border">
+                                <span class="w-2 h-2 rounded-full bg-pastel-terracotta"></span>
+                                Specialty Roasters • Urban Sanctuary
+                            </div>
+
+                            <h1 class="font-heading text-4xl sm:text-6xl font-bold text-pastel-charcoal leading-[1.05]">
+                                Your Comfort Zone Away From Home.
+                            </h1>
+
+                            <p class="text-base sm:text-lg text-pastel-muted max-w-xl leading-relaxed font-normal">
+                                Meticulously sourced single-origin coffee, handcrafted sourdough pastries, high-speed Wi-Fi, and quiet corners designed for slow mornings.
+                            </p>
+
+                            <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                                <button onclick="navigateTo('menu')" class="px-7 py-3.5 bg-pastel-charcoal hover:bg-pastel-terracotta text-white text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                                    <span>Explore Menu</span>
+                                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </button>
+                                <button onclick="navigateTo('location')" class="px-7 py-3.5 bg-pastel-card hover:bg-pastel-accent text-pastel-charcoal border border-pastel-border text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                                    <span>Find Us</span>
+                                </button>
+                            </div>
+
+                            <!-- Stats Row -->
+                            <div class="pt-8 grid grid-cols-3 gap-6 border-t border-pastel-border max-w-lg">
+                                <div>
+                                    <div class="font-heading text-2xl font-bold text-pastel-charcoal">100%</div>
+                                    <div class="text-[11px] text-pastel-muted uppercase tracking-wider font-semibold">Organic Beans</div>
+                                </div>
+                                <div>
+                                    <div class="font-heading text-2xl font-bold text-pastel-charcoal">500 Mbps</div>
+                                    <div class="text-[11px] text-pastel-muted uppercase tracking-wider font-semibold">Free Fiber Wi-Fi</div>
+                                </div>
+                                <div>
+                                    <div class="font-heading text-2xl font-bold text-pastel-charcoal">Fresh</div>
+                                    <div class="text-[11px] text-pastel-muted uppercase tracking-wider font-semibold">Baked Daily</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Hero Card (Half-Height Porcelain Series) -->
+                        <div class="lg:col-span-5">
+                            <div class="sharp-card p-3 bg-pastel-card/90 backdrop-blur shadow-sm">
+                                <div class="w-full h-36 sm:h-44 bg-pastel-accent border border-pastel-border relative overflow-hidden flex items-center justify-center">
+                                    <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80" 
+                                         alt="Gold Trim Porcelain Ceramic Cup" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
+                                        <div class="text-white">
+                                            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300 block">Backdrop Highlight</span>
+                                            <h3 class="font-heading font-bold text-sm">Gold Trim Porcelain Series</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- FIRST AMBIENT VIDEO SHOWCASE SECTION -->
+                <section class="py-16 px-4 sm:px-6 lg:px-8 border-b border-pastel-border bg-pastel-charcoal text-white">
+                    <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-8 items-center">
+                        <div class="lg:col-span-5 space-y-4">
+                            <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Craftsmanship in Motion</span>
+                            <h2 class="font-heading text-3xl sm:text-4xl font-bold text-white leading-tight">Artisanal Espresso Extraction</h2>
+                            <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                                Every shot is dialed in fresh throughout the morning using 9-bar pressure extraction for maximum velvet mouthfeel and aromatic richness.
+                            </p>
+                        </div>
+                        <div class="lg:col-span-7">
+                            <div class="sharp-card overflow-hidden border border-white/20 shadow-2xl relative aspect-video bg-black">
+                                <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                                    <source src="coffee-hero.mp4" type="video/mp4">
+                                    <source src="https://assets.mixkit.co/videos/preview/mixkit-coffee-pouring-into-a-cup-41584-large.mp4" type="video/mp4">
+                                    Your browser does not support HTML5 video.
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECOND VIDEO SECTION: "URBAN HAVEN / EVERYDAY SANCTUARY" WITH FULL VIDEO BACKGROUND -->
+                <section class="relative py-28 px-4 sm:px-6 lg:px-8 border-b border-pastel-border overflow-hidden bg-black text-white">
+                    
+                    <!-- Dual-Source Video Background (Local coffee-hero.mp4 first, Cloud stream fallback second) -->
+                    <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover -z-0 opacity-45">
+                        <source src="coffee-hero.mp4" type="video/mp4">
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-barista-preparing-a-coffee-in-a-coffee-shop-41583-large.mp4" type="video/mp4">
+                    </video>
+                    
+                    <!-- Dark Gradient Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/80 z-0"></div>
+
+                    <!-- Foreground Text Content -->
+                    <div class="relative z-10 max-w-4xl mx-auto text-center space-y-6">
+                        <span class="inline-block px-3 py-1 bg-pastel-terracotta text-white text-[10px] font-bold uppercase tracking-widest">Urban Haven</span>
+                        <h2 class="font-heading text-4xl sm:text-6xl font-bold tracking-tight text-white leading-tight">
+                            Your Everyday Sanctuary.
+                        </h2>
+                        <p class="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto leading-relaxed">
+                            A serene space crafted with warm oak tables, soft lighting, and the subtle hum of jazz. Step away from the rush of the city and sink into your favorite spot.
+                        </p>
+                        <div class="pt-4 flex flex-wrap justify-center gap-4">
+                            <button onclick="navigateTo('hours')" class="px-8 py-3.5 bg-white text-pastel-charcoal hover:bg-pastel-terracotta hover:text-white font-bold text-xs uppercase tracking-widest transition-colors shadow-lg">
+                                View Opening Hours
+                            </button>
+                            <button onclick="navigateTo('location')" class="px-8 py-3.5 border-2 border-white/80 text-white hover:bg-white hover:text-pastel-charcoal font-bold text-xs uppercase tracking-widest transition-colors">
+                                Reserve A Table
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- COMMUNITY INSTAGRAM FEED SECTION (RESPONSIVE 3x3 GRID WITH ASPECT-SQUARE TILES) -->
+                <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12 bg-pastel-bg/60">
+                    <div class="text-center max-w-xl mx-auto space-y-2">
+                        <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Community & Moments</span>
+                        <h2 class="font-heading text-3xl sm:text-4xl font-bold text-pastel-charcoal">#VelvetBeanLife</h2>
+                        <p class="text-xs sm:text-sm text-pastel-muted">Tag @thevelvetbeancafe on Instagram to be featured on our community wall.</p>
+                    </div>
+
+                    <!-- 3x3 Grid with locked aspect-square tiles -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                        
+                        <!-- Tile 1 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Latte Art Specialty" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>428</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>32</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 2 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Barista Pour Over" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>612</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>45</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 3 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Artisan Sourdough Bakery" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>890</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>58</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 4 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Avocado Toast Brunch" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>512</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>29</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 5 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Pour Over Chemex Setup" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>734</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>41</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 6 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Single Origin Coffee Beans" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>945</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>67</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 7 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Matcha Latte" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>678</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>39</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 8 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Artisan Gourmet Sandwich" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>521</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>22</span>
+                            </div>
+                        </div>
+
+                        <!-- Tile 9 -->
+                        <div class="sharp-card group overflow-hidden relative aspect-square bg-pastel-accent">
+                            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80" 
+                                 alt="Cozy Cafe Seating Corner" 
+                                 referrerpolicy="no-referrer"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white text-xs font-bold">
+                                <span><i class="fa-solid fa-heart mr-2 text-pastel-terracotta"></i>1,042</span>
+                                <span><i class="fa-solid fa-comment mr-2"></i>84</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ================= ROUTE 2: MENU ================= -->
+            <div id="page-menu" class="page-view hidden-page">
+                <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+                    <div class="text-center max-w-xl mx-auto space-y-3">
+                        <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Handcrafted Menu</span>
+                        <h1 class="font-heading text-4xl sm:text-5xl font-bold text-pastel-charcoal">Coffee & Kitchen</h1>
+                        <p class="text-xs sm:text-sm text-pastel-muted">Prepared fresh daily with organic ingredients and seasonal micro-lot roasts.</p>
+                    </div>
+
+                    <!-- Micro-Interaction Category Filters -->
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <button onclick="filterMenu('all')" id="filter-all" class="menu-filter-btn active-filter px-5 py-2 text-xs font-bold uppercase tracking-wider bg-pastel-charcoal text-white">All Items</button>
+                        <button onclick="filterMenu('espresso')" id="filter-espresso" class="menu-filter-btn px-5 py-2 text-xs font-bold uppercase tracking-wider bg-pastel-card border border-pastel-border text-pastel-muted hover:text-pastel-charcoal">Espresso Bar</button>
+                        <button onclick="filterMenu('matcha')" id="filter-matcha" class="menu-filter-btn px-5 py-2 text-xs font-bold uppercase tracking-wider bg-pastel-card border border-pastel-border text-pastel-muted hover:text-pastel-charcoal">Matcha & Tea</button>
+                        <button onclick="filterMenu('bakery')" id="filter-bakery" class="menu-filter-btn px-5 py-2 text-xs font-bold uppercase tracking-wider bg-pastel-card border border-pastel-border text-pastel-muted hover:text-pastel-charcoal">Fresh Bakery</button>
+                    </div>
+
+                    <!-- Clean Adaptive Grid with 1:1 Aspect Ratio Containers -->
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+                        
+                        <!-- Menu Item 1 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="espresso">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Lavender Honey Latte" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Lavender Honey Latte</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">Espresso, organic local wildflower honey, dried lavender syrup.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$6.50</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Item 2 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="bakery">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Cardamom Morning Bun" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Cardamom Morning Bun</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">Flaky laminated sourdough dough rolled with crushed cardamom & brown sugar.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$5.25</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Item 3 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="matcha">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Ceremonial Matcha Oat Cloud" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Matcha Oat Cloud</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">First-harvest Uji ceremonial matcha whisked with steamed oat milk & vanilla foam.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$7.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Item 4 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="bakery">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Artisanal Avocado Toast" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Artisanal Avocado Toast</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">Thick cut sourdough, crushed hass avocado, chili flakes, microgreens & sea salt.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$12.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Item 5 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="espresso">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Smoked Vanilla Cold Brew Tonic" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Cold Brew Tonic</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">24-hour steeped single origin cold brew poured over artisanal fever-tree tonic & citrus zest.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$6.75</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Item 6 -->
+                        <div class="sharp-card menu-card bg-pastel-card flex flex-col justify-between p-4" data-category="bakery">
+                            <div class="space-y-3">
+                                <div class="w-full aspect-square overflow-hidden bg-pastel-accent border border-pastel-border">
+                                    <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80" 
+                                         alt="Almond Butter Croissant" 
+                                         referrerpolicy="no-referrer"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-base text-pastel-charcoal">Almond Butter Croissant</h3>
+                                        <p class="text-xs text-pastel-muted mt-1">Twice-baked French butter croissant filled with house frangipane & toasted almonds.</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 bg-pastel-accent font-heading font-bold text-xs text-pastel-terracotta border border-pastel-border">$5.75</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= ROUTE 3: HOURS ================= -->
+            <div id="page-hours" class="page-view hidden-page">
+                <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-8">
+                    <div class="text-center space-y-2">
+                        <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Opening Schedule</span>
+                        <h1 class="font-heading text-4xl font-bold text-pastel-charcoal">Café Hours</h1>
+                        <p class="text-xs text-pastel-muted">Coffee bar and fresh kitchen service timings throughout the week.</p>
+                    </div>
+
+                    <div class="sharp-card p-8 bg-pastel-card space-y-6">
+                        <div class="flex items-center justify-between py-3 border-b border-pastel-border">
+                            <span class="font-bold text-sm text-pastel-charcoal">Monday – Thursday</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-pastel-terracotta">7:00 AM – 6:00 PM</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-pastel-border">
+                            <span class="font-bold text-sm text-pastel-charcoal">Friday</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-pastel-terracotta">7:00 AM – 8:00 PM</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-pastel-border">
+                            <span class="font-bold text-sm text-pastel-charcoal">Saturday</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-pastel-terracotta">8:00 AM – 8:00 PM</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <span class="font-bold text-sm text-pastel-charcoal">Sunday</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-pastel-terracotta">8:00 AM – 5:00 PM</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= ROUTE 4: LOCATION ================= -->
+            <div id="page-location" class="page-view hidden-page">
+                <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8">
+                    <div class="text-center space-y-2">
+                        <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Visit Us</span>
+                        <h1 class="font-heading text-4xl font-bold text-pastel-charcoal">Our Location</h1>
+                        <p class="text-xs text-pastel-muted">Situated in the heart of the arts district.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="sharp-card p-8 bg-pastel-card space-y-4">
+                            <h3 class="font-heading font-bold text-xl text-pastel-charcoal">The Velvet Bean Café</h3>
+                            <p class="text-xs text-pastel-muted leading-relaxed">
+                                142 Artisan Boulevard, Suite 10B<br>
+                                Downtown Arts District, NY 10012
+                            </p>
+                            <div class="pt-4 border-t border-pastel-border space-y-2">
+                                <p class="text-xs text-pastel-charcoal"><i class="fa-solid fa-subway mr-2 text-pastel-terracotta"></i> 2 mins walk from Grand Station</p>
+                                <p class="text-xs text-pastel-charcoal"><i class="fa-solid fa-square-parking mr-2 text-pastel-terracotta"></i> On-site customer bike rack & parking</p>
+                            </div>
+                        </div>
+
+                        <div class="sharp-card p-4 bg-pastel-card h-64 flex items-center justify-center text-center border border-pastel-border">
+                            <div class="space-y-2">
+                                <i class="fa-solid fa-map-location-dot text-3xl text-pastel-terracotta"></i>
+                                <h4 class="font-heading font-bold text-sm">Interactive Map Embed</h4>
+                                <p class="text-[11px] text-pastel-muted">142 Artisan Blvd, New York, NY 10012</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ================= ROUTE 5: CONTACT ================= -->
+            <div id="page-contact" class="page-view hidden-page">
+                <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto space-y-8">
+                    <div class="text-center space-y-2">
+                        <span class="text-pastel-terracotta text-xs font-bold uppercase tracking-widest">Get In Touch</span>
+                        <h1 class="font-heading text-4xl font-bold text-pastel-charcoal">Contact & Catering</h1>
+                        <p class="text-xs text-pastel-muted">Questions regarding catering, private events, or wholesale coffee roasts.</p>
+                    </div>
+
+                    <div id="contact-success-toast" class="hidden p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                        <i class="fa-solid fa-circle-check mr-2"></i> Thank you! Your message has been received.
+                    </div>
+
+                    <form onsubmit="handleContactSubmit(event)" class="sharp-card p-8 bg-pastel-card space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-pastel-charcoal mb-1">Your Name</label>
+                            <input type="text" required class="w-full px-4 py-2.5 bg-pastel-accent border border-pastel-border text-xs focus:outline-none focus:border-pastel-charcoal">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-pastel-charcoal mb-1">Email Address</label>
+                            <input type="email" required class="w-full px-4 py-2.5 bg-pastel-accent border border-pastel-border text-xs focus:outline-none focus:border-pastel-charcoal">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-pastel-charcoal mb-1">Message</label>
+                            <textarea rows="4" required class="w-full px-4 py-2.5 bg-pastel-accent border border-pastel-border text-xs focus:outline-none focus:border-pastel-charcoal"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-pastel-charcoal text-white text-xs font-bold uppercase tracking-widest hover:bg-pastel-terracotta transition-colors">
+                            Send Message
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-pastel-charcoal text-white border-t border-pastel-border py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left space-y-1">
+                    <span class="font-heading font-bold text-lg text-white uppercase tracking-wider">The Velvet Bean Café</span>
+                    <p class="text-xs text-gray-400">© 2026 The Velvet Bean Roastery & Café. All rights reserved.</p>
+                </div>
+                <div class="flex items-center space-x-6 text-sm text-gray-400">
+                    <a href="#" class="hover:text-pastel-terracotta transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="hover:text-pastel-terracotta transition-colors"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-pastel-terracotta transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SPA ROUTING & MENU FILTERING JAVASCRIPT -->
+    <script>
+        function navigateTo(routeId) {
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.remove('active-page');
+                view.classList.add('hidden-page');
+            });
+
+            const activeView = document.getElementById('page-' + routeId);
+            if (activeView) {
+                activeView.classList.remove('hidden-page');
+                activeView.classList.add('active-page');
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-pastel-accent', 'border', 'border-pastel-border', 'text-pastel-charcoal');
+                btn.classList.add('text-pastel-muted');
+            });
+
+            const activeNav = document.getElementById('nav-' + routeId);
+            if (activeNav) {
+                activeNav.classList.add('bg-pastel-accent', 'border', 'border-pastel-border', 'text-pastel-charcoal');
+                activeNav.classList.remove('text-pastel-muted');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterMenu(category) {
+            document.querySelectorAll('.menu-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-pastel-charcoal', 'text-white');
+                btn.classList.add('bg-pastel-card', 'border', 'border-pastel-border', 'text-pastel-muted');
+            });
+
+            const activeBtn = document.getElementById('filter-' + category);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-pastel-charcoal', 'text-white');
+                activeBtn.classList.remove('bg-pastel-card', 'border', 'border-pastel-border', 'text-pastel-muted');
+            }
+
+            document.querySelectorAll('.menu-card').forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const toast = document.getElementById('contact-success-toast');
+            if (toast) {
+                toast.classList.remove('hidden');
+            }
+            event.target.reset();
+        }
+
+        // Window resize event to force Three.js and layout calculations to align
+        window.addEventListener('load', () => {
+            window.dispatchEvent(new Event('resize'));
+        });
+    </script>
+
+    <!-- THREE.JS 3D BACKGROUND CUP RENDERER (WHITE PORCELAIN & METALLIC GOLD TRIM) -->
+    <script>
+        let scene, camera, renderer, cupGroup;
+
+        function init3D() {
+            const container = document.getElementById('bgCanvasContainer');
+            const canvas = document.getElementById('cupCanvas');
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.2, 5.5);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Warm Studio Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xfff8f0, 1.2);
+            scene.add(ambientLight);
+
+            const warmDirLight = new THREE.DirectionalLight(0xffd79e, 1.8);
+            warmDirLight.position.set(5, 8, 5);
+            scene.add(warmDirLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            fillLight.position.set(-5, -2, -2);
+            scene.add(fillLight);
+
+            cupGroup = new THREE.Group();
+
+            // White Porcelain Material
+            const porcelainMaterial = new THREE.MeshStandardMaterial({
+                color: 0xFAF8F5,
+                roughness: 0.25,
+                metalness: 0.1
+            });
+
+            // Metallic Gold Trim Material
+            const goldMaterial = new THREE.MeshStandardMaterial({
+                color: 0xD4AF37,
+                roughness: 0.2,
+                metalness: 0.85
+            });
+
+            // Coffee Liquid Material
+            const coffeeMaterial = new THREE.MeshStandardMaterial({
+                color: 0x3D2314,
+                roughness: 0.4
+            });
+
+            // Cup Body
+            const cupPoints = [];
+            cupPoints.push(new THREE.Vector2(0.8, 0));
+            cupPoints.push(new THREE.Vector2(1.1, 0.4));
+            cupPoints.push(new THREE.Vector2(1.2, 1.2));
+            cupPoints.push(new THREE.Vector2(1.22, 1.6));
+            
+            const cupGeo = new THREE.LatheGeometry(cupPoints, 48);
+            const cupMesh = new THREE.Mesh(cupGeo, porcelainMaterial);
+            cupGroup.add(cupMesh);
+
+            // Gold Rim Accent
+            const rimGeo = new THREE.TorusGeometry(1.21, 0.03, 16, 48);
+            const rimMesh = new THREE.Mesh(rimGeo, goldMaterial);
+            rimMesh.rotation.x = Math.PI / 2;
+            rimMesh.position.y = 1.6;
+            cupGroup.add(rimMesh);
+
+            // Coffee Liquid Insert
+            const coffeeGeo = new THREE.CylinderGeometry(1.18, 1.18, 0.1, 32);
+            const coffeeMesh = new THREE.Mesh(coffeeGeo, coffeeMaterial);
+            coffeeMesh.position.y = 1.5;
+            cupGroup.add(coffeeMesh);
+
+            // Saucer Plate
+            const saucerPoints = [];
+            saucerPoints.push(new THREE.Vector2(0.5, 0.05));
+            saucerPoints.push(new THREE.Vector2(1.6, 0.15));
+            saucerPoints.push(new THREE.Vector2(2.0, 0.4));
+            
+            const saucerGeo = new THREE.LatheGeometry(saucerPoints, 48);
+            const saucerMesh = new THREE.Mesh(saucerGeo, porcelainMaterial);
+            saucerMesh.position.y = -0.1;
+            cupGroup.add(saucerMesh);
+
+            // Gold Saucer Rim Accent
+            const saucerRimGeo = new THREE.TorusGeometry(2.0, 0.025, 16, 48);
+            const saucerRimMesh = new THREE.Mesh(saucerRimGeo, goldMaterial);
+            saucerRimMesh.rotation.x = Math.PI / 2;
+            saucerRimMesh.position.y = 0.38;
+            cupGroup.add(saucerRimMesh);
+
+            // Cup Handle
+            const handleGeo = new THREE.TorusGeometry(0.55, 0.09, 16, 32, Math.PI * 1.1);
+            const handleMesh = new THREE.Mesh(handleGeo, porcelainMaterial);
+            handleMesh.position.set(1.2, 0.8, 0);
+            handleMesh.rotation.z = -Math.PI / 6;
+            cupGroup.add(handleMesh);
+
+            // Position cup towards right background
+            cupGroup.position.set(1.8, -0.4, 0);
+            scene.add(cupGroup);
+
+            // Initial Scroll Rotation
+            updateScrollRotation();
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('scroll', updateScrollRotation);
+
+            animate();
+        }
+
+        function updateScrollRotation() {
+            if (cupGroup) {
+                const scrollY = window.scrollY;
+                cupGroup.rotation.y = scrollY * 0.003;
+                cupGroup.rotation.x = Math.sin(scrollY * 0.001) * 0.1;
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Position adjustment for mobile screens
+            if (window.innerWidth < 768) {
+                cupGroup.position.set(0, -0.8, -1.5);
+            } else {
+                cupGroup.position.set(1.8, -0.4, 0);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (cupGroup) {
+                cupGroup.rotation.y += 0.001;
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('DOMContentLoaded', init3D);
+    </script>
+</body>
+</html>
